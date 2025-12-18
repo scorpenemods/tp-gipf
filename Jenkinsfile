@@ -1,11 +1,6 @@
 pipeline {
     agent any
 
-    tools {
-        jdk 'JDK11'
-        gradle 'Gradle'
-    }
-
     stages {
 
         stage('Checkout') {
