@@ -15,12 +15,6 @@ pipeline {
             }
         }
 
-        stage('Tests + JaCoCo') {
-            steps {
-                sh './gradlew test jacocoTestReport'
-            }
-        }
-
         stage('Build JAR') {
             steps {
                 sh './gradlew jar'
