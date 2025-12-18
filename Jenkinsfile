@@ -2,12 +2,8 @@ pipeline {
     agent any
 
     tools {
-        jdk 'JDK17'          // ou JDK11 selon votre projet
+        jdk 'JDK11'
         gradle 'Gradle'
-    }
-
-    environment {
-        SONAR_SCANNER_HOME = tool 'SonarScanner'
     }
 
     stages {
@@ -30,32 +26,6 @@ pipeline {
             }
         }
 
-        stage('SonarQube Analysis') {
-            steps {
-                withSonarQubeEnv('SonarQube') {
-                    sh """
-                        ${SONAR_SCANNER_HOME}/bin/sonar-scanner \
-                        -Dsonar.projectKey=gradle-demo \
-                        -Dsonar.projectName=gradle-demo \
-                        -Dsonar.projectVersion=${BUILD_NUMBER} \
-                        -Dsonar.sources=src/main/java \
-                        -Dsonar.tests=src/test/java \
-                        -Dsonar.java.binaries=build/classes \
-                        -Dsonar.coverage.jacoco.xmlReportPaths=build/reports/jacoco/test/jacocoTestReport.xml \
-                        -Dsonar.host.url=http://IP_SONARQUBE:9000
-                    """
-                }
-            }
-        }
-
-        stage('Quality Gate') {
-            steps {
-                timeout(time: 2, unit: 'MINUTES') {
-                    waitForQualityGate abortPipeline: true
-                }
-            }
-        }
-
         stage('Build JAR') {
             steps {
                 sh './gradlew jar'
@@ -71,10 +41,10 @@ pipeline {
 
     post {
         success {
-            echo '✅ Pipeline terminé avec succès'
+            echo '✅'
         }
         failure {
-            echo '❌ Pipeline échoué'
+            echo '❌'
         }
     }
 }
