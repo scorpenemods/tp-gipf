@@ -1,17 +1,9 @@
 plugins {
     id 'org.liquibase.gradle' version '2.2.0'
-}
-
-plugins {
     id 'java'
     id 'jacoco'
     id "org.sonarqube" version "4.3.0.3225"
 }
-
-
-apply plugin: 'java'
-apply plugin: 'jacoco'
-apply plugin: 'SonarScanner'
 
 repositories {
     mavenCentral()
