@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+    environment {
+        SCANNER_HOME = tool 'SonarScanner'
+    }
+
     stages {
 
         stage('Checkout') {
@@ -21,6 +25,23 @@ pipeline {
             }
         }
 
+        stage('SonarQube Analysis') {
+            steps {
+                withSonarQubeEnv('SonarQube') {
+                    sh """
+                        ${SCANNER_HOME}/bin/sonar-scanner \
+                        -Dsonar.projectKey=gipf \
+                        -Dsonar.projectName=gipf \
+                        -Dsonar.sources=src/main/java \
+                        -Dsonar.tests=src/test/java \
+                        -Dsonar.java.binaries=build/classes \
+                        -Dsonar.coverage.jacoco.xmlReportPaths=build/reports/jacoco/test/jacocoTestReport.xml \
+                        -Dsonar.host.url=http://localhost:9000
+                    """
+                }
+            }
+        }
+
         stage('Build JAR') {
             steps {
                 sh './gradlew jar'
@@ -36,10 +57,10 @@ pipeline {
 
     post {
         success {
-            echo '✅ Pipeline avec JaCoCo terminé avec succès'
+            echo '✅'
         }
         failure {
-            echo '❌ Pipeline échoué'
+            echo '❌'
         }
     }
 }
