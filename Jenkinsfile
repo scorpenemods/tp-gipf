@@ -24,10 +24,11 @@ pipeline {
 
         stage('SonarQube Analysis') {
             steps {
-                sh "./gradlew sonarqube \
-                   -Dsonar.projectKey=gipf \
-                   -Dsonar.host.url=http://localhost:9000 \
-                   -Dsonar.login=sqa_f908a0f5594c3fbdcc30256e8040a25fc92af576"
+                sh "./gradlew sonar \
+                  -Dsonar.projectKey=tp-gipf \
+                  -Dsonar.projectName='tp-gipf' \
+                  -Dsonar.host.url=http://localhost:9000 \
+                  -Dsonar.token=sqp_aedac4cd369479f1b1412148fd67bf3ddb793cff
             }
         }
 
