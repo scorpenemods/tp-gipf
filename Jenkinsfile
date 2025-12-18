@@ -28,7 +28,7 @@ pipeline {
                   -Dsonar.projectKey=tp-gipf \
                   -Dsonar.projectName='tp-gipf' \
                   -Dsonar.host.url=http://localhost:9000 \
-                  -Dsonar.token=sqp_aedac4cd369479f1b1412148fd67bf3ddb793cff
+                  -Dsonar.token=sqp_aedac4cd369479f1b1412148fd67bf3ddb793cff"
             }
         }
 
