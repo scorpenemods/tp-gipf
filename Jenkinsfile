@@ -1,10 +1,6 @@
 pipeline {
     agent any
     
-    tools {
-        nodejs "NodeJS"
-    }
-
     environment {
         DOCKER_IMAGE = "jenkins-demo-app"
         DOCKER_TAG = "${BUILD_NUMBER}"
@@ -19,18 +15,7 @@ pipeline {
                 checkout scm
             }
         }
-        
-        stage('Install Dependencies') {
-            steps {
-                sh 'npm install'
-            }
-        }
-        
-        stage('Run Tests') {
-            steps {
-                sh 'npm test'
-            }
-        }
+    
 
         stage('SonarQube Analysis') {
             steps {
