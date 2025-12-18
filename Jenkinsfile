@@ -1,80 +1,80 @@
 pipeline {
     agent any
-    
-    environment {
-        DOCKER_IMAGE = "jenkins-demo-app"
-        DOCKER_TAG = "${BUILD_NUMBER}"
-        CONTAINER_NAME = "jenkins-demo-container"
 
-        SCANNER_HOME = tool 'SonarQube-Server'
+    tools {
+        jdk 'JDK17'          // ou JDK11 selon votre projet
+        gradle 'Gradle'
     }
-    
+
+    environment {
+        SONAR_SCANNER_HOME = tool 'SonarScanner'
+    }
+
     stages {
+
         stage('Checkout') {
             steps {
                 checkout scm
             }
         }
-    
+
+        stage('Compilation') {
+            steps {
+                sh './gradlew compileJava'
+            }
+        }
+
+        stage('Tests + JaCoCo') {
+            steps {
+                sh './gradlew test jacocoTestReport'
+            }
+        }
 
         stage('SonarQube Analysis') {
             steps {
                 withSonarQubeEnv('SonarQube') {
                     sh """
-                        ${SCANNER_HOME}/bin/sonar-scanner \
-                        -Dsonar.projectKey=nodejs-jenkins-sample-app \
-                        -Dsonar.projectName=nodejs-sample-app \
-                        -Dsonar.sources=. \
-                        -Dsonar.exclusions=**/node_modules/**,**/test/**
+                        ${SONAR_SCANNER_HOME}/bin/sonar-scanner \
+                        -Dsonar.projectKey=gradle-demo \
+                        -Dsonar.projectName=gradle-demo \
+                        -Dsonar.projectVersion=${BUILD_NUMBER} \
+                        -Dsonar.sources=src/main/java \
+                        -Dsonar.tests=src/test/java \
+                        -Dsonar.java.binaries=build/classes \
+                        -Dsonar.coverage.jacoco.xmlReportPaths=build/reports/jacoco/test/jacocoTestReport.xml \
+                        -Dsonar.host.url=http://IP_SONARQUBE:9000
                     """
                 }
             }
         }
 
-        stage("Quality Gate") {
+        stage('Quality Gate') {
             steps {
                 timeout(time: 2, unit: 'MINUTES') {
                     waitForQualityGate abortPipeline: true
                 }
             }
         }
-        
-        stage('Build Docker Image') {
+
+        stage('Build JAR') {
             steps {
-                script {
-                    docker.build("${DOCKER_IMAGE}:${DOCKER_TAG}")
-                }
+                sh './gradlew jar'
             }
         }
-        
-        stage('Deploy') {
+
+        stage('Archive JAR') {
             steps {
-                script {
-                    def fullImage = "${DOCKER_IMAGE}:${BUILD_NUMBER}"
-                    
-                    sh """
-                        docker rm -f ${CONTAINER_NAME} || true
-                        docker ps -a --filter "publish=3000" -q | xargs -r docker rm -f || true
-                        
-                        docker run -d \
-                            --name ${CONTAINER_NAME} \
-                            -p 3000:3000 \
-                            ${fullImage}
-                    """
-                }
+                archiveArtifacts artifacts: 'build/libs/*.jar', fingerprint: true
             }
         }
     }
-    
+
     post {
-        always {
-            sh "docker image prune -f"
-        }
         success {
-            echo 'Pipeline Success! Application deployed.'
+            echo '✅ Pipeline terminé avec succès'
         }
         failure {
-            echo 'Pipeline Failed. Check logs.'
+            echo '❌ Pipeline échoué'
         }
     }
 }
