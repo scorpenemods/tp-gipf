@@ -24,21 +24,9 @@ pipeline {
                 sh './gradlew test jacocoTestReport'
             }
         }
-
         stage('SonarQube Analysis') {
             steps {
-                withSonarQubeEnv('SonarQube') {
-                    sh """
-                        ${SCANNER_HOME}/bin/sonar-scanner \
-                        -Dsonar.projectKey=gipf \
-                        -Dsonar.projectName=gipf \
-                        -Dsonar.sources=src/main/java \
-                        -Dsonar.tests=src/test/java \
-                        -Dsonar.java.binaries=build/classes \
-                        -Dsonar.coverage.jacoco.xmlReportPaths=build/reports/jacoco/test/jacocoTestReport.xml \
-                        -Dsonar.host.url=http://localhost:9000
-                    """
-                }
+                sh './gradlew sonarqube -Dsonar.projectKey=gipf -Dsonar.host.url=http://localhost:9000 -Dsonar.login=sqa_f908a0f5594c3fbdcc30256e8040a25fc92af576
             }
         }
 
